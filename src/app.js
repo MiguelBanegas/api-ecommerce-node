@@ -6,9 +6,24 @@ require("dotenv").config();
 const app = express();
 
 // Middleware
+// Middleware CORS
+const allowedOrigins = [
+  "https://mabcontrol.ar",
+  "https://curso-react2025-mocha.vercel.app",
+  "http://localhost:3003",
+  "http://localhost:5173" // agregalo si usás Vite
+];
+
 app.use(cors({
-  origin: ['https://mabcontrol.ar', 'https://curso-react2025-mocha.vercel.app', 'http://localhost:3003']
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 }));
+
+// Esto habilita la respuesta a preflight automáticamente
+app.options("*", cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
