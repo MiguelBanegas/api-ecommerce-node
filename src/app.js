@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan"); // Optional logging
+const setupCleanupCron = require("./utils/cleanupCron");
 require("dotenv").config();
 
 const app = express();
@@ -11,15 +12,17 @@ const allowedOrigins = [
   "https://mabcontrol.ar",
   "https://curso-react2025-mocha.vercel.app",
   "http://localhost:3003",
-  "http://localhost:5173" // agregalo si usás Vite
+  "http://localhost:5173", // agregalo si usás Vite
 ];
 
-app.use(cors({
-  origin: allowedOrigins,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,4 +38,5 @@ const PORT = process.env.PORT || 3003;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  setupCleanupCron(); // Initialize cron job for cleaning expired carts
 });
