@@ -21,9 +21,6 @@ app.use(cors({
   credentials: true
 }));
 
-// Esto habilita la respuesta a preflight automáticamente
-app.options("*", cors());
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
