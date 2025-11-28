@@ -11,7 +11,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-g
+
 // Routes
 app.use("/api", require("./routes"));
 // Health check
