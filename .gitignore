@@ -1,0 +1,20 @@
+# Dependencies
+node_modules
+
+# Environment variables
+.env
+
+# Firebase credentials
+serviceAccountKey.json
+
+# Test data files (optional - remove if you want to version them)
+products.json
+users.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
