@@ -7,7 +7,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['https://mabcontrol.ar', 'http://localhost:3003']
+  origin: ['https://mabcontrol.ar', 'https://curso-react2025-mocha.vercel.app', 'http://localhost:3003']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
