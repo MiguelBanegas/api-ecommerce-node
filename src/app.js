@@ -13,6 +13,7 @@ const allowedOrigins = [
   "https://curso-react2025-mocha.vercel.app",
   "http://localhost:3003",
   "http://localhost:5173", // agregalo si usás Vite
+  "https://ecommerce.mabcontrol.ar",
 ];
 
 app.use(
