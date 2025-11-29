@@ -11,11 +11,13 @@ const server = http.createServer(app);
 
 // Upgrade para WebSocket
 server.on("upgrade", (request, socket, head) => {
+  console.log("Upgrade request:", request.url);
   if (request.url === "/ws") {
     wss.handleUpgrade(request, socket, head, (ws) => {
       wss.emit("connection", ws, request);
     });
   } else {
+    console.log("WS connection rejected");
     socket.destroy();
   }
 });
