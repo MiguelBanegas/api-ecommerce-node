@@ -50,14 +50,19 @@ app.get("/", (req, res) => {
 
 // Endpoint para notificar a clientes WebSocket de nuevo build
 app.post("/notify-build", (req, res) => {
+  const deployTime = new Date().toISOString();
   if (wss) {
     // broadcast a todos los clientes conectados
     wss.clients.forEach((client) => {
       if (client.readyState === client.OPEN) {
-        client.send(JSON.stringify({ type: "NEW_BUILD" }));
+        client.send(JSON.stringify({ type: "NEW_BUILD", deployTime }));
       }
     });
-    res.send({ status: "ok", message: "Notificación enviada a los clientes" });
+    res.send({
+      status: "ok",
+      message: "Notificación enviada a los clientes",
+      deployTime,
+    });
   } else {
     res
       .status(500)
