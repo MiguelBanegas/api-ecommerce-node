@@ -48,9 +48,26 @@ app.get("/", (req, res) => {
   res.send("API E-commerce is running");
 });
 
+// Endpoint para notificar a clientes WebSocket de nuevo build
+app.post("/notify-build", (req, res) => {
+  if (wss) {
+    // broadcast a todos los clientes conectados
+    wss.clients.forEach((client) => {
+      if (client.readyState === client.OPEN) {
+        client.send(JSON.stringify({ type: "NEW_BUILD" }));
+      }
+    });
+    res.send({ status: "ok", message: "Notificación enviada a los clientes" });
+  } else {
+    res
+      .status(500)
+      .send({ status: "error", message: "WebSocket server no disponible" });
+  }
+});
+
 const PORT = process.env.PORT || 3003;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   setupCleanupCron(); // Initialize cron job for cleaning expired carts
 });
