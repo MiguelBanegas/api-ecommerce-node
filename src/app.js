@@ -1,12 +1,25 @@
 const express = require("express");
+const http = require("http");
+const { wss } = require("./ws-server");
 const cors = require("cors");
 const morgan = require("morgan"); // Optional logging
 const setupCleanupCron = require("./utils/cleanupCron");
 require("dotenv").config();
 
 const app = express();
+const server = http.createServer(app);
 
-// Middleware
+// Upgrade para WebSocket
+server.on("upgrade", (request, socket, head) => {
+  if (request.url === "/ws") {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  } else {
+    socket.destroy();
+  }
+});
+
 // Middleware CORS
 const allowedOrigins = [
   "https://mabcontrol.ar",
