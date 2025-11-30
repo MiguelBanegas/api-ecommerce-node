@@ -1,11 +1,43 @@
 const express = require("express");
 const http = require("http");
 const path = require("path");
-//const { wss } = require("./ws-server");
+// Carga segura del WebSocket server (opcional)
+let wss = null;
+try {
+  // Si existe, importamos el módulo ws-server para manejar upgrades
+  const wsMod = require("./ws-server");
+  wss = wsMod.wss;
+  if (wss) {
+    console.log("✅ WebSocket server cargado");
+  } else {
+    console.log("ℹ️  WebSocket server disponible pero desactivado (wss=null)");
+  }
+} catch (e) {
+  console.warn("ℹ️  WebSocket server no disponible o fallo al cargar:", e.message);
+}
 const cors = require("cors");
 const morgan = require("morgan"); // Optional logging
 const setupCleanupCron = require("./utils/cleanupCron");
-require("dotenv").config();
+
+// Load environment variables
+const fs = require("fs");
+const envPath = path.join(__dirname, "../.env");
+if (fs.existsSync(envPath)) {
+  const envConfig = fs.readFileSync(envPath, "utf8");
+  envConfig.split("\n").forEach((line) => {
+    const trimmedLine = line.trim();
+    if (trimmedLine && !trimmedLine.startsWith("#")) {
+      const [key, ...valueParts] = trimmedLine.split("=");
+      const value = valueParts.join("=").trim();
+      if (key && value) {
+        process.env[key.trim()] = value;
+      }
+    }
+  });
+  console.log("✅ Variables de entorno cargadas desde .env");
+} else {
+  console.warn("⚠️  Archivo .env no encontrado en:", envPath);
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -14,9 +46,14 @@ const server = http.createServer(app);
 server.on("upgrade", (request, socket, head) => {
   console.log("Upgrade request:", request.url);
   if (request.url === "/ws") {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit("connection", ws, request);
-    });
+    if (wss) {
+      wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit("connection", ws, request);
+      });
+    } else {
+      console.warn("WS upgrade recibido pero no hay un servidor WS disponible");
+      socket.destroy();
+    }
   } else {
     console.log("WS connection rejected");
     socket.destroy();
@@ -45,12 +82,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ========== NUEVO: Servir archivos estáticos de uploads ==========
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
-console.log(
-  "📁 Sirviendo archivos estáticos desde:",
-  path.join(__dirname, "../uploads")
-);
-
+/* app.use("/uploads", express.static(path.join(__dirname, "../uploads"))); */
+/* console.log( */
+/*   "📁 Sirviendo archivos estáticos desde:", */
+/*   path.join(__dirname, "../uploads") */
+/* ); */
+/*  */
 // Routes
 app.use("/api", require("./routes"));
 
@@ -82,8 +119,13 @@ app.get("/", (req, res) => {
 /* }); */
 
 const PORT = process.env.PORT || 3003;
-
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   setupCleanupCron(); // Initialize cron job for cleaning expired carts
+});
+
+// Log simple health check para confirmar que el proceso sigue respondiendo
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
+  next();
 });
