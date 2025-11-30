@@ -1,6 +1,43 @@
 const express = require("express");
 const router = express.Router();
 const { db } = require("../config/firebase");
+const upload = require("../middleware/uploadMiddleware");
+const { processImage } = require("./imageController");
+
+// ========== NUEVA RUTA: Upload de imagen ==========
+router.post(
+  "/upload-image",
+  upload.single("image"),
+  processImage,
+  (req, res) => {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ error: "No se proporcionó ninguna imagen" });
+    }
+
+    try {
+      // Generar URL pública
+      const imageUrl = `${req.protocol}://${req.get("host")}/uploads/products/${
+        req.file.filename
+      }`;
+
+      console.log("✅ Imagen subida:", req.file.filename);
+
+      res.json({
+        success: true,
+        imageUrl: imageUrl,
+        filename: req.file.filename,
+      });
+    } catch (error) {
+      console.error("Error en upload:", error);
+      res.status(500).json({ error: "Error al procesar la imagen" });
+    }
+  }
+);
+
+// ========== RUTAS EXISTENTES ==========
+
 // Get all products
 router.get("/", async (req, res) => {
   try {
@@ -14,6 +51,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 // Create a product
 router.post("/", async (req, res) => {
   try {
@@ -35,6 +73,7 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 // Update a product
 router.put("/:id", async (req, res) => {
   try {
@@ -63,6 +102,7 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 // Delete a product
 router.delete("/:id", async (req, res) => {
   try {
@@ -83,6 +123,7 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 // Seed products (Bulk insert)
 router.post("/seed", async (req, res) => {
   try {
@@ -110,4 +151,5 @@ router.post("/seed", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 module.exports = router;

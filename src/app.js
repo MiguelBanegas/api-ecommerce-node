@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const { wss } = require("./ws-server");
 const cors = require("cors");
 const morgan = require("morgan"); // Optional logging
@@ -43,8 +44,16 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ========== NUEVO: Servir archivos estáticos de uploads ==========
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+console.log(
+  "📁 Sirviendo archivos estáticos desde:",
+  path.join(__dirname, "../uploads")
+);
+
 // Routes
 app.use("/api", require("./routes"));
+
 // Health check
 app.get("/", (req, res) => {
   res.send("API E-commerce is running");
