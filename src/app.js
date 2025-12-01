@@ -82,12 +82,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ========== NUEVO: Servir archivos estáticos de uploads ==========
-/* app.use("/uploads", express.static(path.join(__dirname, "../uploads"))); */
-/* console.log( */
-/*   "📁 Sirviendo archivos estáticos desde:", */
-/*   path.join(__dirname, "../uploads") */
-/* ); */
-/*  */
+const uploadsPath = path.join(__dirname, "../uploads");
+try {
+  if (!fs.existsSync(uploadsPath)) {
+    fs.mkdirSync(uploadsPath, { recursive: true });
+    console.log("📁 Carpeta 'uploads' creada:", uploadsPath);
+  }
+} catch (err) {
+  console.warn("⚠️  No se pudo asegurar la carpeta uploads:", err.message);
+}
+
+app.use("/uploads", express.static(uploadsPath));
+console.log("📁 Sirviendo archivos estáticos desde:", uploadsPath);
+
+// Si se solicita un archivo bajo /uploads y no existe, loguear para debugging
+app.use("/uploads", (req, res) => {
+  console.warn(`Archivo estático solicitado no encontrado: ${req.originalUrl}`);
+  res.status(404).send("Not found");
+});
 // Routes
 app.use("/api", require("./routes"));
 
