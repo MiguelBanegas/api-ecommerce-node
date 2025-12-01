@@ -39,6 +39,17 @@ if (fs.existsSync(envPath)) {
   console.warn("⚠️  Archivo .env no encontrado en:", envPath);
 }
 
+// Startup check: warn if RESEND_API_KEY is missing (helps debug checkout failures)
+if (!process.env.RESEND_API_KEY) {
+  console.warn(
+    "⚠️  RESEND_API_KEY no está configurada. Los endpoints que envían emails fallarán.\n" +
+      "   - En desarrollo: crea un archivo .env con RESEND_API_KEY en la raíz o exporta la variable antes de iniciar.\n" +
+      "   - En producción: configura la variable en el gestor de procesos (pm2/systemd) o proveedor de hosting."
+  );
+} else {
+  console.log("✅ RESEND_API_KEY presente: envío de emails habilitado");
+}
+
 const app = express();
 const server = http.createServer(app);
 
