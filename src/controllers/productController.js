@@ -18,9 +18,7 @@ router.post(
 
     try {
       // Generar URL pública
-      const imageUrl = `${req.protocol}://${req.get("host")}/uploads/products/${
-        req.file.filename
-      }`;
+      const imageUrl = `https://api.mabcontrol.ar/uploads/products/${req.file.filename}`;
 
       console.log("✅ Imagen subida:", req.file.filename);
 
